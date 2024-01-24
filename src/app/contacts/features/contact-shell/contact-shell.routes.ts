@@ -14,6 +14,11 @@ export default [
         loadComponent: () =>
           import('../contact-create/contact-create.component'),
       },
+      {
+        path: 'edit/:contactId',
+        loadComponent: () =>
+          import('../contact-create/contact-create.component'),
+      },
     ],
   },
   {

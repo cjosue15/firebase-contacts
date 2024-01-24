@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import {
   FormBuilder,
   FormControl,
@@ -9,6 +9,8 @@ import { RouterLink, Router } from '@angular/router';
 
 import { IconRocket } from '../../../shared/ui/icons/rocket';
 import { IconBack } from '../../../shared/ui/icons/back';
+import { ContactsService } from '../../data-access/contacts.service';
+import { ContactForm } from '../../shared/interfaces/contacts.interface';
 
 export interface CreateForm {
   fullName: FormControl<string>;
@@ -86,7 +88,11 @@ export interface CreateForm {
             type="submit"
           >
             <app-icon-rocket />
-            Create your contact
+            @if (contactId) {
+              Edit your contact
+            } @else {
+              Create your contact
+            }
           </button>
         </div>
       </form>
@@ -100,6 +106,19 @@ export default class ContactCreateComponent {
 
   private _router = inject(Router);
 
+  private _contactsService = inject(ContactsService);
+
+  private _contactId = '';
+
+  get contactId(): string {
+    return this._contactId;
+  }
+
+  @Input() set contactId(value: string) {
+    this._contactId = value;
+    this.setFormValues(this._contactId);
+  }
+
   form = this._formBuilder.group<CreateForm>({
     fullName: this._formBuilder.control('', Validators.required),
     email: this._formBuilder.control('', [
@@ -110,9 +129,30 @@ export default class ContactCreateComponent {
     description: this._formBuilder.control(''),
   });
 
-  createContact(): void {
+  async createContact() {
     if (this.form.invalid) return;
 
-    console.log(this.form.value);
+    try {
+      const contact = this.form.value as ContactForm;
+      !this.contactId
+        ? await this._contactsService.createContact(contact)
+        : await this._contactsService.updateContact(this.contactId, contact);
+      this._router.navigate(['/dashboard']);
+    } catch (error) {
+      // call some toast service to handle the error
+    }
+  }
+
+  async setFormValues(id: string) {
+    try {
+      const contact = await this._contactsService.getContact(id);
+      if (!contact) return;
+      this.form.setValue({
+        fullName: contact.fullName,
+        email: contact.email,
+        phoneNumber: contact.phoneNumber,
+        description: contact.description,
+      });
+    } catch (error) {}
   }
 }

@@ -1,8 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { CardContactComponent } from '../../ui/card-contact/card-contact.component';
 import { IconPlus } from '../../../shared/ui/icons/plus';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { ContactsService } from '../../data-access/contacts.service';
+import { AsyncPipe } from '@angular/common';
+import { Contact } from '../../shared/interfaces/contacts.interface';
 
 @Component({
   selector: 'app-contact-dashboard',
@@ -23,13 +26,33 @@ import { RouterLink } from '@angular/router';
         </a>
       </div>
       <section class="grid grid-cols-3 gap-8 mt-8">
-        @for (contact of [1, 2, 3]; track contact) {
-          <app-card-contact />
+        @for (contact of contacts$ | async; track contact.id) {
+          <app-card-contact
+            [contact]="contact"
+            (deleteContact)="deleteContact($event)"
+            (editContact)="editContact($event)"
+          />
         }
       </section>
     </div>
   `,
   standalone: true,
-  imports: [CardContactComponent, IconPlus, RouterLink],
+  imports: [CardContactComponent, IconPlus, RouterLink, AsyncPipe],
 })
-export default class ContactDashboardComponent {}
+export default class ContactDashboardComponent {
+  private _contactsService = inject(ContactsService);
+
+  private _router = inject(Router);
+
+  contacts$ = this._contactsService.getContacts();
+
+  async deleteContact(id: string) {
+    try {
+      await this._contactsService.deleteContact(id);
+    } catch (error) {}
+  }
+
+  editContact(contact: Contact) {
+    this._router.navigate(['/dashboard/edit', contact.id]);
+  }
+}
