@@ -5,3 +5,7 @@
 :root {
   color-scheme: light dark;
 }
+
+body {
+  @apply bg-black;
+}

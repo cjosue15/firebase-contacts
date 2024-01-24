@@ -12,7 +12,7 @@ import { IconDelete } from '../../../shared/ui/icons/delete';
       @if (isOpen) {
         <!-- Dropdown menu -->
         <div
-          class="z-10 absolute right-0 top-7 p-1 min-w-24 bg-black rounded-md shadow overflow-hidden"
+          class="z-10 absolute right-0 top-7 p-1 min-w-24 bg-black rounded-md border border-gray-500/50 shadow overflow-hidden"
         >
           <ul
             class="text-sm text-gray-200"
@@ -50,6 +50,6 @@ export class MenuComponent {
   isOpen = false;
 
   openMenu() {
-    this.isOpen = true;
+    this.isOpen = !this.isOpen;
   }
 }
