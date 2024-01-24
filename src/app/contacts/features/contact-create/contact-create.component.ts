@@ -5,12 +5,10 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 import { IconRocket } from '../../../shared/ui/icons/rocket';
 import { IconBack } from '../../../shared/ui/icons/back';
-import { ContactsService } from '../../data-access/contacts.service';
-import { ContactForm } from '../../shared/interfaces/contacts.interface';
 
 export interface CreateForm {
   fullName: FormControl<string>;
@@ -104,10 +102,6 @@ export interface CreateForm {
 export default class ContactCreateComponent {
   private _formBuilder = inject(FormBuilder).nonNullable;
 
-  private _router = inject(Router);
-
-  private _contactsService = inject(ContactsService);
-
   private _contactId = '';
 
   get contactId(): string {
@@ -131,28 +125,7 @@ export default class ContactCreateComponent {
 
   async createContact() {
     if (this.form.invalid) return;
-
-    try {
-      const contact = this.form.value as ContactForm;
-      !this.contactId
-        ? await this._contactsService.createContact(contact)
-        : await this._contactsService.updateContact(this.contactId, contact);
-      this._router.navigate(['/dashboard']);
-    } catch (error) {
-      // call some toast service to handle the error
-    }
   }
 
-  async setFormValues(id: string) {
-    try {
-      const contact = await this._contactsService.getContact(id);
-      if (!contact) return;
-      this.form.setValue({
-        fullName: contact.fullName,
-        email: contact.email,
-        phoneNumber: contact.phoneNumber,
-        description: contact.description,
-      });
-    } catch (error) {}
-  }
+  async setFormValues(id: string) {}
 }
